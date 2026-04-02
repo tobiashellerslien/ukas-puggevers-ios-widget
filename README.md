@@ -61,7 +61,7 @@ const REF_SIZE     = { small: 13, medium: 14, large: 15 };
 
 Scraperen henter verstekst fra [bible.com](https://www.bible.com) og lagrer den i en JSON-fil. Allerede hentede vers hoppes over, så du kan stoppe og fortsette uten å miste fremgang.
 
->OBS! Noen oversettelser (særlig engelske) tar ikke med intro-verset i salmene (eks. Av David) som vers 1, disse versene blir da forskyvd med 1. 
+>OBS! Noen oversettelser (særlig engelske) tar ikke med intro-verset i salmene (eks. Av David) som vers 1, disse versene blir da forskyvd med 1. Versintervallet må da manuelt endres i .json filen.
 
 ### Forutsetninger
 
