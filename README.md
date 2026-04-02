@@ -1,4 +1,4 @@
-# Ukas puggevers – iOS-widget
+# Ukas puggevers - iOS-widget
 
 ![](widget_example.jpg)
 
@@ -8,7 +8,7 @@ Verslisten er basert på John MacArthur sin liste for "52 bibeltekster en kriste
 
 >DISCLAIMER: Dobbeltsjekk verset mot bibelen hver uke, kan ikke garantere at det ikke har skjedd noen små feil under scrapingen, og har ikke manuelt sjekket alle versene.
 
-## Del 1 – Enkel oppsett
+## Del 1 - Enkel oppsett
 
 Følg disse stegene for å sette opp widgeten med en ferdig oversettelse.
 
@@ -20,8 +20,8 @@ Last ned [Scriptable](https://apps.apple.com/app/scriptable/id1405459188) fra Ap
 
 Last ned disse 2 filene:
 
-- `widget/ukas_puggevers_widget.js` – widget-skriptet
-- `verses/[oversettelse].json` – versene
+- `widget/ukas_puggevers_widget.js` - widget-skriptet
+- `verses/[oversettelse].json` - versene
 
 Velg ønsket oversettelse fra `verses/` mappen. Hvis du vil ha en annen, se Del 2.
 
@@ -42,7 +42,7 @@ Gi `[oversettelse].json` filen nytt navn til `bibelvers.json`.
 5. Trykk på widgeten og velg **Rediger widget**
 6. Under **Script** velger du **ukas_puggevers_widget**
 
-> Widgeten er testet på iPhone 13 Pro Max og iPad Pro 11". På mindre iPhoner kan det hende at teksten ikke får plass – se avsnittet om fontstørrelse nedenfor.
+> Widgeten er testet på iPhone 13 Pro Max og iPad Pro 11". På mindre iPhoner kan det hende at teksten ikke får plass - se avsnittet om fontstørrelse nedenfor.
 
 ### 6. Endre fontstørrelse (valgfritt)
 
@@ -57,7 +57,7 @@ const REF_SIZE     = { small: 13, medium: 14, large: 15 };
 
 ---
 
-## Del 2 – Scrape egne vers / andre oversettelser
+## Del 2 - Scrape egne vers / andre oversettelser
 
 Scraperen henter verstekst fra [bible.com](https://www.bible.com) og lagrer den i en JSON-fil. Allerede hentede vers hoppes over, så du kan stoppe og fortsette uten å miste fremgang.
 
@@ -117,9 +117,9 @@ Formatet er:
 ]
 ```
 
-- **`week`** – ukenummer (1–52), brukes av widgeten til å velge riktig vers
-- **`ref`** – boknavn + kapittel:vers. Boknavnet må stemme med det som er i `BOOK_MAP` i scraperen (se nedenfor)
-- **`text`** – la stå tom; scraperen fyller inn
+- **`week`** - ukenummer (1-52), brukes av widgeten til å velge riktig vers
+- **`ref`** - boknavn + kapittel:vers. Boknavnet må stemme med det som er i `BOOK_MAP` i scraperen (se nedenfor)
+- **`text`** - la stå tom; scraperen fyller inn
 
 Etter scraping, kopier filen til Scriptable-mappen i iCloud og gi den nytt navn til `bibelvers.json`.
 
