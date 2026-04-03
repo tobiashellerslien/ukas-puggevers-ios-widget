@@ -1,4 +1,4 @@
-# Ukas puggevers - iOS-widget
+# Ukas puggevers iOS-widget
 
 ![](widget_example.jpg)
 
