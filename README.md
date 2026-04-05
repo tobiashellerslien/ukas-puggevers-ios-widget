@@ -4,142 +4,70 @@
 
 En iOS-widget som viser ukas puggevers. Bygget med [Scriptable](https://scriptable.app/), som lar deg kjøre JavaScript-skript direkte i iOS-widgets.
 
-Verslisten er basert på John MacArthur sin liste for "52 bibeltekster en kristen burde lære seg", med noen vers lagt til der det var naturlig. Listen starter på uke 14, siden det var da vi begynte med dette. Den dekker alle 52 uker.
+Verslisten er basert på John MacArthur sin liste for "52 bibeltekster en kristen burde lære seg", med noen vers lagt til der det var naturlig. Listen starter på uke 14, siden det var da vi begynte med dette. Den dekker alle 52 uker. Har scrapet de vanligste norske oversettelsene (NB88/07, Bibel2011 bokmål og nynorsk, BGO). Vil du ha en annen, se Del 2.
+> DISCLAIMER: Dobbeltsjekk verset mot bibelen hver uke, kan ikke garantere at det ikke har skjedd noen feil under scrapingen.
 
->DISCLAIMER: Dobbeltsjekk verset mot bibelen hver uke, kan ikke garantere at det ikke har skjedd noen små feil under scrapingen, og har ikke manuelt sjekket alle versene.
+## Del 1 - Oppsett
 
-## Del 1 - Enkel oppsett
+1. Last ned [Scriptable](https://apps.apple.com/app/scriptable/id1405459188) fra App Store og åpne appen. Dette oppretter mappen `Scriptable` i iCloud Drive automatisk.
+2. Last ned `widget/ukas_puggevers_widget.js` og ønsket `verses/[oversettelse].json` (vil du ha en annen oversettelse, se Del 2).
+3. Legg begge filene i **iCloud Drive → Scriptable** (via Filer-appen).
+4. Gi vers-filen nytt navn til `bibelvers.json`.
+5. Legg til en **4x4** (stor) Scriptable widget på hjemskjermen. Trykk på widgeten, velg **Rediger widget**, og sett **Script** til **ukas_puggevers_widget**.
 
-Følg disse stegene for å sette opp widgeten med en ferdig oversettelse.
-
-### 1. Installer Scriptable
-
-Last ned [Scriptable](https://apps.apple.com/app/scriptable/id1405459188) fra App Store og åpne appen én gang. Dette oppretter mappen `Scriptable` i iCloud Drive automatisk.
-
-### 2. Last ned nødvendinge filer
-
-Last ned disse 2 filene:
-
-- `widget/ukas_puggevers_widget.js` - widget-skriptet
-- `verses/[oversettelse].json` - versene
-
-Velg ønsket oversettelse fra `verses/` mappen. Hvis du vil ha en annen, se Del 2.
-
-### 3. Legg filene i iCloud Drive
-
-Åpne Filer-appen og naviger til **iCloud Drive → Scriptable**. Legg begge filene inni her. De vil bli synkronisert mellom iOS enhetene dine, så det er enkelt å sette opp på f.eks iPhone + iPad.
-
-### 4. Rename vers-filen
-
-Gi `[oversettelse].json` filen nytt navn til `bibelvers.json`.
-
-### 5. Opprett widgeten på hjemskjermen
-
-1. Hold fingeren på hjemskjermen til ikonene begynner å riste
-2. Trykk **+** øverst til venstre
-3. Søk etter **Scriptable** og velg størrelsen **stor (4×4)**
-4. Legg widgeten til på hjemskjermen
-5. Trykk på widgeten og velg **Rediger widget**
-6. Under **Script** velger du **ukas_puggevers_widget**
-
-> Widgeten er testet på iPhone 13 Pro Max og iPad Pro 11". På mindre iPhoner kan det hende at teksten ikke får plass - se avsnittet om fontstørrelse nedenfor.
-
-### 6. Endre fontstørrelse (valgfritt)
-
-Åpne `ukas_puggevers_widget.js` i Scriptable og juster disse konstantene øverst i filen:
+### Endre skriftstørrelse (valgfritt):
+Skriftstørrelsen er testet på iPhone 13 Pro Max. Hvis du har en mindre iPhone og hele teksten ikke vises, må du endre fontstørrelsen.
+Åpne `ukas_puggevers_widget.js` i Scriptable og juster konstantene øverst i filen. `large` brukes for 4×4-widgeten.
 
 ```js
-const BODY_SIZE    = { small: 14, medium: 15, large: 16 };
-const REF_SIZE     = { small: 13, medium: 14, large: 15 };
+const BODY_SIZE = { small: 14, medium: 15, large: 16 };
+const REF_SIZE  = { small: 13, medium: 14, large: 15 };
 ```
-
-`large` brukes for 4×4-widgeten. Senk verdiene litt hvis teksten ikke får plass på din skjermstørrelse.
+**Tips:** Den lengste bibelteksten i denne listen er Salme 23, som er i uke 46. Hvis du i scriptet midlertidig bytter ut linje 83
+```
+const week = weekNumber(new Date());
+``` 
+med 
+```
+const week = 46 //weekNumber(new Date());
+```
+kan du se om Salme 23 får plass på widgeten din. Hvis du stiller skriftstørrelsen til denne får plass, vet du at alle andre også vil få plass.
 
 ---
 
-## Del 2 - Scrape egne vers / andre oversettelser
+## Del 2 - Scrape en ny oversettelse 
 
-Scraperen henter verstekst fra [bible.com](https://www.bible.com) og lagrer den i en JSON-fil. Allerede hentede vers hoppes over, så du kan stoppe og fortsette uten å miste fremgang.
+Scraperen henter verstekst fra [bible.com](https://www.bible.com) og lagrer den i en JSON-fil. Den er basert på [bible-scraper](https://github.com/IonicaBizau/bible-scraper), og i tillegg rensker den outputen og kombinerer vers på en ryddig måte.
 
->OBS! Noen oversettelser (særlig engelske) tar ikke med intro-verset i salmene (eks. Av David) som vers 1, disse versene blir da forskyvd med 1. Versintervallet må da manuelt endres i .json filen.
 
-### Forutsetninger
+**Forutsetninger:** [Node.js](https://nodejs.org/) og `npm install` fra prosjektmappen.
 
-[Node.js](https://nodejs.org/) må være installert. Kjør denne fra prosjektmappen for å laste ned avhengigheter til scraperen.
+### 1. Finn oversettelsens ID
 
-```bash
-npm install
+Gå til [bible.com/versions](https://www.bible.com/versions), åpne ønsket oversettelse og les av tallet i URL-en:
+
 ```
+https://www.bible.com/bible/100/GEN.1.NASB1995  →  100
+```
+> OBS! Noen oversettelser tar ikke med intro-verset i salmene (f.eks. "Av David") som vers 1. Da forskyves versintervallet med 1 og må rettes manuelt i JSON-filen.
 
-### Bruk
+### 2. Lag en ny versfil
 
-Kjøres fra prosjektets rotmappe:
+Lag en kopi av ``verses/template.json`` malen, og gi den et nytt navn. Denne inneholder referanser på norsk, bytt disse til engelsk om du scraper en engelsk oversettelse. Boknavnene må stemme med `BOOK_MAP` i scraperen (enten norsk eller engelsk, andre språk krever ny `BOOK_MAP`).
+La `text` stå tom, scraperen fyller disse inn. 
+
+### 3. Kjør scraperen
 
 ```bash
 node scraper/scrape-verses.js <translation_id> <verses-fil>
+
+# Eksempel:
+node scraper/scrape-verses.js 100 verses/NASB1995.json
 ```
 
-Eksempler:
+Allerede hentede vers hoppes over, så du kan stoppe og fortsette uten å miste fremgang.
 
-```bash
-# Norsk NB 88/07 (standard)
-node scraper/scrape-verses.js
-
-# NIV (engelsk)
-node scraper/scrape-verses.js 111 verses/NIV.json
-
-# Egendefinert fil
-node scraper/scrape-verses.js 102 verses/min-liste.json
-```
-
-### Finn translation ID
-
-Gå til [bible.com/versions](https://www.bible.com/versions), finn ønsket oversettelse og åpne den. Tallet i URL-en er ID-en:
-
-```
-https://www.bible.com/bible/111/JHN.3.NIV  →  111
-```
-
-### Lag en ny versliste
-
-Kopier malen og rediger refs-feltene:
-
-```bash
-cp verses/template.json verses/MinOversettelse.json
-```
-
-Formatet er:
-
-```json
-[
-  { "week": 1,  "ref": "Psalms 23:1-3", "text": "" },
-  { "week": 2,  "ref": "John 3:16",     "text": "" }
-]
-```
-
-- **`week`** - ukenummer (1-52), brukes av widgeten til å velge riktig vers
-- **`ref`** - boknavn + kapittel:vers. Boknavnet må stemme med det som er i `BOOK_MAP` i scraperen (se nedenfor)
-- **`text`** - la stå tom; scraperen fyller inn
-
-Etter scraping, kopier filen til Scriptable-mappen i iCloud og gi den nytt navn til `bibelvers.json`.
-
-### Boknavn og andre språk
-
-`BOOK_MAP` øverst i `scraper/scrape-verses.js` oversetter boknavn til USFM-koder. Norske og engelske boknavn er inkludert. For andre språk legger du til egne oppføringer:
-
-```js
-"Psaume": "PSA",   // Fransk
-"Psalm":  "PSA",   // allerede inkludert (engelsk)
-"Salme":  "PSA",   // allerede inkludert (norsk)
-```
-
-### Bøker med bare ett kapittel
-
-For Obadja, Filemon, 2. Johannesbrev, 3. Johannesbrev og Judas skrives versnummeret direkte etter boknavnet:
-
-```json
-{ "week": 38, "ref": "Judas 24-25", "text": "" }
-```
+Når scraping er ferdig, kopier filen til Scriptable-mappen i iCloud Drive og gi den nytt navn til `bibelvers.json`.
 
 ---
 
