@@ -10,13 +10,13 @@ Verslisten er basert på John MacArthur sin liste for "52 bibeltekster en kriste
 ## Del 1 - Oppsett
 
 1. Last ned [Scriptable](https://apps.apple.com/app/scriptable/id1405459188) fra App Store og åpne appen. Dette oppretter mappen `Scriptable` i iCloud Drive automatisk.
-2. Last ned `widget/ukas_puggevers_widget.js` og ønsket `verses/[oversettelse].json` (vil du ha en annen oversettelse, se Del 2).
+2. Last ned `ukas_puggevers_widget.js` og ønsket `scraped_verses/[oversettelse].json` (vil du ha en annen oversettelse, se Del 2).
 3. Legg begge filene i **iCloud Drive → Scriptable** (via Filer-appen).
 4. Gi vers-filen nytt navn til `bibelvers.json`.
 5. Legg til en **4x4** (stor) Scriptable widget på hjemskjermen. Trykk på widgeten, velg **Rediger widget**, og sett **Script** til **ukas_puggevers_widget**.
 
 ### Endre skriftstørrelse (valgfritt):
-Skriftstørrelsen er testet på iPhone 13 Pro Max. Hvis du har en mindre iPhone og hele teksten ikke vises, må du endre fontstørrelsen.
+Skriftstørrelsen er testet på iPhone 13 Pro Max. Skriftstørrelsen vil til en viss grad kunne tilpasse seg automatisk, men hvis du har en mindre iPhone og hele teksten ikke vises (eller du vil ha større tekst), må du endre skriftstørrelsen.
 Åpne `ukas_puggevers_widget.js` i Scriptable og juster konstantene øverst i filen. `large` brukes for 4×4-widgeten.
 
 ```js
@@ -35,43 +35,26 @@ kan du se om Salme 23 får plass på widgeten din. Hvis du stiller skriftstørre
 
 ---
 
-## Del 2 - Scrape en ny oversettelse 
+## Del 2 - Scrape en ny oversettelse
 
-Scraperen henter verstekst fra [bible.com](https://www.bible.com) og lagrer den i en JSON-fil. Den er basert på [bible-scraper](https://github.com/IonicaBizau/bible-scraper), og i tillegg rensker den outputen og kombinerer vers på en ryddig måte.
+Scraperen er et eget Python-prosjekt (lenke kommer). Du trenger filene derfra for å bruke `fill_json.py` i dette repoet.
 
+>OBS! Noen oversettelser tar ikke med intro-verset i salmene (f.eks. "Av David") som vers 1. Da forskyves versintervallet med 1 og må rettes manuelt i JSON-filen.
 
-**Forutsetninger:** [Node.js](https://nodejs.org/) og `npm install` fra prosjektmappen.
+### Bruk
 
-### 1. Finn oversettelsens ID
-
-Gå til [bible.com/versions](https://www.bible.com/versions), åpne ønsket oversettelse og les av tallet i URL-en:
-
-```
-https://www.bible.com/bible/100/GEN.1.NASB1995  →  100
-```
-> OBS! Noen oversettelser tar ikke med intro-verset i salmene (f.eks. "Av David") som vers 1. Da forskyves versintervallet med 1 og må rettes manuelt i JSON-filen.
-
-### 2. Lag en ny versfil
-
-Lag en kopi av ``verses/template.json`` malen, og gi den et nytt navn. Denne inneholder referanser på norsk, bytt disse til engelsk om du scraper en engelsk oversettelse. Boknavnene må stemme med `BOOK_MAP` i scraperen (enten norsk eller engelsk, andre språk krever ny `BOOK_MAP`).
-La `text` stå tom, scraperen fyller disse inn. 
-
-### 3. Kjør scraperen
+Lag en kopi av `scraped_verses/template.json` og gi den et nytt navn. Finn oversettelsens ID på [bible.com/versions](https://www.bible.com/versions) (tallet i URL-en). Kjør så:
 
 ```bash
-node scraper/scrape-verses.js <translation_id> <verses-fil>
-
-# Eksempel:
-node scraper/scrape-verses.js 100 verses/NASB1995.json
+python fill_json.py --file [filsti til .json som skal fylles inn] --translation-id [id]
 ```
 
 Allerede hentede vers hoppes over, så du kan stoppe og fortsette uten å miste fremgang.
 
-Når scraping er ferdig, kopier filen til Scriptable-mappen i iCloud Drive og gi den nytt navn til `bibelvers.json`.
+Når scrapingen er ferdig, kopier filen til Scriptable-mappen i iCloud Drive og gi den nytt navn til `bibelvers.json`.
 
 ---
 
 ## Takk til
 
-- [bible-scraper](https://github.com/IonicaBizau/bible-scraper) av [Ionică Bizău](https://github.com/IonicaBizau)
 - Claude Code
