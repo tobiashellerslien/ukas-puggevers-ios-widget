@@ -37,7 +37,7 @@ kan du se om Salme 23 får plass på widgeten din. Hvis du stiller skriftstørre
 
 ## Del 2 - Scrape en ny oversettelse
 
-Scraperen er et eget Python-prosjekt (lenke kommer). Du trenger filene derfra for å bruke `fill_json.py` i dette repoet.
+Scraperen er et eget [Python-prosjekt](https://github.com/tobiashellerslien/bible-scraper). Du trenger filene derfra for å bruke `fill_json.py` i dette repoet.
 
 >OBS! Noen oversettelser tar ikke med intro-verset i salmene (f.eks. "Av David") som vers 1. Da forskyves versintervallet med 1 og må rettes manuelt i JSON-filen.
 
