@@ -15,8 +15,8 @@ const FILENAME = "bibelvers.json";
 const BIBLE_ID = 102;
 
 // ── Fontstørrelser (Base) ────────────────────────────────────────
-const BODY_SIZE = { small: 16, medium: 19, large: 22 };
-const REF_SIZE  = { small: 12, medium: 14, large: 15 };
+const BODY_SIZE   = { small: 16, medium: 19, large: 22 };
+const REF_OFFSET  = 2;  // ref-tekst er alltid dette mange punkter mindre enn body
 
 // ── Boknavn → USFM-forkortelse ────────────────────────────────────
 const BOOK_MAP = {
@@ -130,14 +130,18 @@ function pickVerse(verses, week) {
 
 // ── Dynamisk skriftstørrelse ──────────────────────────────────────
 function getDynamicSize(text, sizeCategory) {
-  let baseSize = BODY_SIZE[sizeCategory] || BODY_SIZE.large;
+  let bodySize = BODY_SIZE[sizeCategory] || BODY_SIZE.large;
   const len = text.length;
 
-  if (len > 200) baseSize -= 4;
-  else if (len > 120) baseSize -= 2;
-  else if (len < 50) baseSize += 4;
+  if (len > 200) bodySize -= 4;
+  else if (len > 120) bodySize -= 2;
+  else if (len < 50)  bodySize += 4;
 
-  return Math.max(baseSize, 12);
+  bodySize = Math.max(bodySize, 12);
+  return {
+    body: bodySize,
+    ref:  Math.max(bodySize - REF_OFFSET, 11),
+  };
 }
 
 // ── Bygg widget ───────────────────────────────────────────────────
@@ -152,18 +156,14 @@ async function buildWidget(verse, size, week) {
   weekLabel.textColor = new Color("#444444");
   weekLabel.font = Font.systemFont(12, "bold");
   weekLabel.minimumScaleFactor = 0.8;
-  weekLabel.font = Font.systemFont(12, "bold");
-  weekLabel.minimumScaleFactor = 0.8;
 
-  w.addSpacer(size === "small" ? 4 : 8);
   w.addSpacer(size === "small" ? 4 : 8);
 
   // Selve versteksten
-  const dynamicFontSize = getDynamicSize(verse.text, size);
-  const dynamicFontSize = getDynamicSize(verse.text, size);
+  const fontSize = getDynamicSize(verse.text, size);
   const bodyText = w.addText("\u201C" + verse.text + "\u201D");
   bodyText.textColor = new Color("#F5F5F0");
-  bodyText.font = new Font("Georgia", dynamicFontSize);
+  bodyText.font = new Font("Georgia", fontSize.body);
   bodyText.minimumScaleFactor = 0.5;
 
   w.addSpacer(6);
@@ -171,22 +171,10 @@ async function buildWidget(verse, size, week) {
   // Referanse
   const refText = w.addText("— " + verse.ref);
   refText.textColor = new Color("#888880");
-  refText.font = new Font("Georgia-Italic", REF_SIZE[size] ?? REF_SIZE.large);
+  refText.font = new Font("Georgia-Italic", fontSize.ref);
   refText.minimumScaleFactor = 0.7;
 
   w.addSpacer();
-
-  // YouVersion-knapp
-  const btnStack = w.addStack();
-  btnStack.backgroundColor = new Color("#3a3a3c");
-  btnStack.cornerRadius = 6;
-  btnStack.setPadding(6, 12, 6, 12);
-  btnStack.url = refToUrl(verse.ref);
-
-  const btnText = btnStack.addText("📖 Åpne i YouVersion");
-  btnText.font = Font.boldSystemFont(12);
-  btnText.textColor = new Color("#ffffff");
-  btnText.minimumScaleFactor = 0.8;
 
   return w;
 }
