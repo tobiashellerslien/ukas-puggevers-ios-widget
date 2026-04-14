@@ -15,25 +15,24 @@ Verslisten er basert på John MacArthur sin liste for "52 bibeltekster en kriste
 4. Gi vers-filen nytt navn til `bibelvers.json`.
 5. Legg til en **4x4** (stor) Scriptable widget på hjemskjermen. Trykk på widgeten, velg **Rediger widget**, og sett **Script** til **ukas_puggevers_widget**.
 
-### Endre skriftstørrelse (valgfritt):
-Skriftstørrelsen er testet på iPhone 13 Pro Max. Skriftstørrelsen vil til en viss grad kunne tilpasse seg automatisk, men hvis du har en mindre iPhone og hele teksten ikke vises (eller du vil ha større tekst), må du endre skriftstørrelsen.
-Åpne `ukas_puggevers_widget.js` i Scriptable og juster konstantene øverst i filen. `large` brukes for 4×4-widgeten.
+### Endre hvilken oversettelse som åpnes i bibel-appen (valgfritt)
 
-```js
-const BODY_SIZE = { small: 14, medium: 15, large: 16 };
-const REF_SIZE  = { small: 13, medium: 14, large: 15 };
-```
-**Tips:** Den lengste bibelteksten i denne listen er Salme 23, som er i uke 46. Hvis du i scriptet midlertidig bytter ut linje 83
-```
-const week = weekNumber(new Date());
-``` 
-med 
-```
-const week = 46 //weekNumber(new Date());
-```
-kan du se om Salme 23 får plass på widgeten din. Hvis du stiller skriftstørrelsen til denne får plass, vet du at alle andre også vil få plass.
+Widgeten har en knapp som åpner ukas tekst i YouVersion-appen (eller nettsiden hvis du ikke har appen). Oversettelsen som skal åpnes må spesifiseres. Default er Norsk Bibel 88/07, men dette kan enkelt endres.
+
+1. Åpne Scriptable appen, finn `ukas_puggevers_widget.js` og trykk på de 3 prikkene på boksen. Scriptet åpnes i editoren.
+2. Finn variabelen `const BIBLE_ID = 102;` på toppen av filen
+3. Bytt ut **bare tallet** (`102`) med ID-en til ønsket oversettelse:
+
+| Oversettelse | ID |
+|---|---|
+| Norsk Bibel 88/07 (NB88) | `102` |
+| Bibelen Guds Ord (BGO) | `2216` |
+| Bibel 2011 bokmål | `29` |
+| Bibel 2011 nynorsk | `119` |
 
 ---
+
+ID-er til andre oversettelser kan finnes ved å gå til [bible.com/versions](https://bible.com/versions) og finne tallet i URL-en, f.eks. `https://www.bible.com/versions/102-nb-norsk-bibel-8807` → ID `102`
 
 ## Del 2 - Scrape en ny oversettelse
 
