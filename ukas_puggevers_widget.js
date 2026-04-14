@@ -6,10 +6,92 @@
 
 const FILENAME = "bibelvers.json";
 
+// ── YouVersion-bibel-ID ───────────────────────────────────────────
+// Finn ID-en på bible.com/versions (tallet i URL-en).
+// 102 -> Norsk Bibel 88/07
+// 2216 -> BGO
+// 29 -> Bibel 2011
+// 119 -> Bibel 2011 nynorsk
+const BIBLE_ID = 102;
+
 // ── Fontstørrelser (Base) ────────────────────────────────────────
-// Størrelsene er økt for å gjøre teksten tydeligere
-const BODY_SIZE    = { small: 16, medium: 19, large: 22 };
-const REF_SIZE     = { small: 12, medium: 14, large: 15 };
+const BODY_SIZE = { small: 16, medium: 19, large: 22 };
+const REF_SIZE  = { small: 12, medium: 14, large: 15 };
+
+// ── Boknavn → USFM-forkortelse ────────────────────────────────────
+const BOOK_MAP = {
+  // Norsk
+  "1. Mosebok": "GEN", "2. Mosebok": "EXO", "3. Mosebok": "LEV",
+  "4. Mosebok": "NUM", "5. Mosebok": "DEU", "Josva": "JOS",
+  "Dommerne": "JDG", "Rut": "RUT", "1. Samuelsbok": "1SA",
+  "2. Samuelsbok": "2SA", "1. Kongebok": "1KI", "2. Kongebok": "2KI",
+  "1. Krønikebok": "1CH", "2. Krønikebok": "2CH", "Esra": "EZR",
+  "Nehemja": "NEH", "Ester": "EST", "Job": "JOB", "Salme": "PSA",
+  "Ordspråkene": "PRO", "Forkynneren": "ECC", "Høysangen": "SNG",
+  "Jesaja": "ISA", "Jeremia": "JER", "Klagesangene": "LAM",
+  "Esekiel": "EZK", "Daniel": "DAN", "Hosea": "HOS", "Joel": "JOL",
+  "Amos": "AMO", "Obadja": "OBA", "Jona": "JON", "Mika": "MIC",
+  "Nahum": "NAH", "Habakkuk": "HAB", "Sefanja": "ZEP", "Haggai": "HAG",
+  "Sakarja": "ZEC", "Malaki": "MAL", "Matteus": "MAT", "Markus": "MRK",
+  "Lukas": "LUK", "Johannes": "JHN", "Apostlenes gjerninger": "ACT",
+  "Romerne": "ROM", "1. Korinterbrev": "1CO", "2. Korinterbrev": "2CO",
+  "Galaterne": "GAL", "Efeserne": "EPH", "Filipperne": "PHP",
+  "Kolosserne": "COL", "1. Tessalonikerbrev": "1TH", "2. Tessalonikerbrev": "2TH",
+  "1. Timoteus": "1TI", "2. Timoteus": "2TI",
+  "Titus": "TIT", "Filemon": "PHM", "Hebreerne": "HEB", "Jakob": "JAS",
+  "1. Peter": "1PE", "2. Peter": "2PE",
+  "1. Johannesbrev": "1JN", "2. Johannesbrev": "2JN", "3. Johannesbrev": "3JN",
+  "Judas": "JUD", "Åpenbaringen": "REV",
+
+  // English
+  "Genesis": "GEN", "Exodus": "EXO", "Leviticus": "LEV", "Numbers": "NUM",
+  "Deuteronomy": "DEU", "Joshua": "JOS", "Judges": "JDG", "Ruth": "RUT",
+  "1 Samuel": "1SA", "2 Samuel": "2SA", "1 Kings": "1KI", "2 Kings": "2KI",
+  "1 Chronicles": "1CH", "2 Chronicles": "2CH", "Ezra": "EZR",
+  "Nehemiah": "NEH", "Esther": "EST", "Psalms": "PSA", "Psalm": "PSA",
+  "Proverbs": "PRO", "Ecclesiastes": "ECC", "Song of Solomon": "SNG",
+  "Song of Songs": "SNG", "Isaiah": "ISA", "Jeremiah": "JER",
+  "Lamentations": "LAM", "Ezekiel": "EZK", "Daniel": "DAN", "Hosea": "HOS",
+  "Joel": "JOL", "Amos": "AMO", "Obadiah": "OBA", "Jonah": "JON",
+  "Micah": "MIC", "Nahum": "NAH", "Habakkuk": "HAB", "Zephaniah": "ZEP",
+  "Haggai": "HAG", "Zechariah": "ZEC", "Malachi": "MAL", "Matthew": "MAT",
+  "Mark": "MRK", "Luke": "LUK", "John": "JHN", "Acts": "ACT",
+  "Romans": "ROM", "1 Corinthians": "1CO", "2 Corinthians": "2CO",
+  "Galatians": "GAL", "Ephesians": "EPH", "Philippians": "PHP",
+  "Colossians": "COL", "1 Thessalonians": "1TH", "2 Thessalonians": "2TH",
+  "1 Timothy": "1TI", "2 Timothy": "2TI", "Titus": "TIT", "Philemon": "PHM",
+  "Hebrews": "HEB", "James": "JAS", "1 Peter": "1PE", "2 Peter": "2PE",
+  "1 John": "1JN", "2 John": "2JN", "3 John": "3JN", "Jude": "JUD",
+  "Revelation": "REV",
+};
+
+// Bøker med bare ett kapittel — referansen inneholder ikke kapittelnummer
+const SINGLE_CHAPTER_BOOKS = new Set(["OBA", "PHM", "2JN", "3JN", "JUD"]);
+
+// ── Bygg YouVersion-URL fra referanse ────────────────────────────
+function refToUrl(ref) {
+  const m = ref.match(/^(.+?)\s+(\d+)(?::(\d+)(?:-(\d+))?|-(\d+))?$/);
+  if (!m) return `https://www.bible.com/bible/${BIBLE_ID}`;
+
+  const bookName = m[1].trim();
+  const abbr = BOOK_MAP[bookName];
+  if (!abbr) return `https://www.bible.com/bible/${BIBLE_ID}`;
+
+  let chapter, start, end;
+  if (SINGLE_CHAPTER_BOOKS.has(abbr)) {
+    chapter = 1;
+    start = parseInt(m[2]);
+    end = m[5] ? parseInt(m[5]) : start;
+  } else {
+    chapter = parseInt(m[2]);
+    start = m[3] ? parseInt(m[3]) : null;
+    end = m[4] ? parseInt(m[4]) : (start !== null ? start : null);
+  }
+
+  if (start === null) return `https://www.bible.com/bible/${BIBLE_ID}/${abbr}.${chapter}`;
+  const verseStr = start === end ? `${start}` : `${start}-${end}`;
+  return `https://www.bible.com/bible/${BIBLE_ID}/${abbr}.${chapter}.${verseStr}`;
+}
 
 // ── Hent verslisten ──────────────────────────────────────────────
 async function loadVerses() {
@@ -50,13 +132,12 @@ function pickVerse(verses, week) {
 function getDynamicSize(text, sizeCategory) {
   let baseSize = BODY_SIZE[sizeCategory] || BODY_SIZE.large;
   const len = text.length;
-  
-  // Justerer skriftstørrelsen basert på antall tegn
+
   if (len > 200) baseSize -= 4;
   else if (len > 120) baseSize -= 2;
-  else if (len < 50) baseSize += 4; // Gjør korte vers enda litt større
-  
-  return Math.max(baseSize, 12); // Sikrer at den aldri blir uleselig liten
+  else if (len < 50) baseSize += 4;
+
+  return Math.max(baseSize, 12);
 }
 
 // ── Bygg widget ───────────────────────────────────────────────────
@@ -64,26 +145,26 @@ async function buildWidget(verse, size, week) {
   const w = new ListWidget();
   w.backgroundColor = new Color("#1c1c1e");
   w.setPadding(18, 20, 18, 20);
-  
-  // Standard widget-handling hvis man trykker utenfor YouVersion-knappen
-  w.url = "scriptable:///run/" + Script.name();
+  w.url = refToUrl(verse.ref);
 
   // Uke-label
   const weekLabel = w.addText(`UKE ${week}`.toUpperCase());
   weekLabel.textColor = new Color("#444444");
   weekLabel.font = Font.systemFont(12, "bold");
   weekLabel.minimumScaleFactor = 0.8;
+  weekLabel.font = Font.systemFont(12, "bold");
+  weekLabel.minimumScaleFactor = 0.8;
 
+  w.addSpacer(size === "small" ? 4 : 8);
   w.addSpacer(size === "small" ? 4 : 8);
 
   // Selve versteksten
   const dynamicFontSize = getDynamicSize(verse.text, size);
+  const dynamicFontSize = getDynamicSize(verse.text, size);
   const bodyText = w.addText("\u201C" + verse.text + "\u201D");
   bodyText.textColor = new Color("#F5F5F0");
   bodyText.font = new Font("Georgia", dynamicFontSize);
-  
-  // Redusert minimumScaleFactor gir iOS lov til å krympe lange tekster mer for å unngå kutting
-  bodyText.minimumScaleFactor = 0.5; 
+  bodyText.minimumScaleFactor = 0.5;
 
   w.addSpacer(6);
 
@@ -95,15 +176,12 @@ async function buildWidget(verse, size, week) {
 
   w.addSpacer();
 
-  // YouVersion Knapp
+  // YouVersion-knapp
   const btnStack = w.addStack();
   btnStack.backgroundColor = new Color("#3a3a3c");
   btnStack.cornerRadius = 6;
   btnStack.setPadding(6, 12, 6, 12);
-  
-  // Universal Link som tvinger iOS til å åpne YouVersion-appen og søke opp verset
-  const query = encodeURIComponent(verse.ref);
-  btnStack.url = "https://www.bible.com/search/bible?q=" + query;
+  btnStack.url = refToUrl(verse.ref);
 
   const btnText = btnStack.addText("📖 Åpne i YouVersion");
   btnText.font = Font.boldSystemFont(12);
@@ -124,7 +202,6 @@ const widget = await buildWidget(verse, size, week);
 if (config.runsInWidget) {
   Script.setWidget(widget);
 } else {
-  // Presentasjon i selve appen for testing
   if (size === "small") widget.presentSmall();
   else if (size === "medium") widget.presentMedium();
   else widget.presentLarge();
